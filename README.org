@@ -1,0 +1,24 @@
+#+title: run-on-todo-state-change
+
+Run arbitrary code on org-mode TODO state change.
+
+Set a property of =RUN_ON_<TODO state>= to one or more functions and they'll
+run when the headline's state is set to =<TODO state>=.
+
+* Examples
+** Trigger alerts on DONE
+
+#+begin_src org-mode
+,#+begin_src emacs-lisp
+(defun you/congratulate-yourself-1 ()
+  (alert "Congratulations!"))
+
+(defun you/congratulate-yourself-2 ()
+  (alert "Well done!"))
+,#+end_src
+
+,* Foo
+:PROPERTIES:
+:RUN_ON_DONE: you/congratulate-yourself-1 you/congratulate-yoursef-2
+:END:
+#+end_src
