@@ -22,3 +22,34 @@ run when the headline's state is set to =<TODO state>=.
 :RUN_ON_DONE: you/congratulate-yourself-1 you/congratulate-yoursef-2
 :END:
 #+end_src
+
+** Increment ordinals in repeating events
+
+Requires [[https://github.com/cashpw/increment-ordinal][cashpw/increment-ordinal]].
+
+#+begin_src org-mode
+,#+begin_src emacs-lisp
+(defun increment-ordinals-in-todo ()
+  "Increment ordinal nubmers in TODO headline."
+  (let ((headline
+        (org-entry-get nil "ITEM")))
+    (org-edit-headline
+     (increment-ordinals-in-string headline)))))
+,#+end_src
+
+,* Jane Doe's 43rd birthday
+SCHEDULED: <2024-01-01 Mon ++1y>
+:PROPERTIES:
+:RUN_ON_DONE: increment-ordinals-in-todo
+:END:
+#+end_src
+
+After =DONE=:
+
+#+begin_src org-mode
+,* Jane Doe's 44th birthday
+SCHEDULED: <2025-01-01 Mon ++1y>
+:PROPERTIES:
+:RUN_ON_DONE: increment-ordinals-in-todo
+:END:
+#+end_src
