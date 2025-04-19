@@ -47,31 +47,19 @@
 
 (defun run-on-todo-state-change-prop (state)
   "Return run-on- org-mode element property based on STATE."
-  (concat
-   run-on-todo-state-change--prop-prefix
-   (upcase state)))
+  (concat run-on-todo-state-change--prop-prefix (upcase state)))
 
 (defun run-on-todo-state-change ()
   "Run arbitrary code on org-mode TODO state change."
-  (when-let*
-      ((new-state
-        org-state)
-       (fns-string
-        (org-extras-get-property
-         (point)
-         (run-on-todo-state-change-prop new-state)))
-       (fns
-        (mapcar
-         #'intern
-         (s-split
-          " "
-          fns-string))))
+  (when-let* ((new-state org-state)
+              (fns-string
+               (org-extras-get-property
+                (point) (run-on-todo-state-change-prop new-state)))
+              (fns (mapcar #'intern (s-split " " fns-string))))
     (dolist (fn fns)
       (apply fn '()))))
 
-(add-hook
- 'org-after-todo-state-change-hook
- 'run-on-todo-state-change)
+(add-hook 'org-after-todo-state-change-hook 'run-on-todo-state-change)
 
 (provide 'run-on-todo-state-change)
 ;;; run-on-todo-state-change.el ends here
