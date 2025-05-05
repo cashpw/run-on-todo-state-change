@@ -24,14 +24,11 @@
 ;;
 ;;  (defun you/foo ()
 ;;    ...)
-;;  (defun you/bar ()
-;;    ...)
-;;  (defun you/baz ()
-;;    ...)
 ;;
 ;;  * Foo
 ;;  :PROPERTIES:
-;;  :RUN_ON_DONE: you/foo you/bar you/baz
+;;  :RUN_ON_DONE: (you/foo)
+;;  :RUN_ON_DONE+: (lambda () (you/foo 1))
 ;;  :END:
 ;;
 ;;; Code:
@@ -55,11 +52,28 @@
               (fns-string
                (org-extras-get-property
                 (point) (run-on-todo-state-change-prop new-state)))
-              (fns (mapcar #'intern (s-split " " fns-string))))
-    (dolist (fn fns)
-      (apply fn '()))))
-
-(add-hook 'org-after-todo-state-change-hook 'run-on-todo-state-change)
+              (fn-strings
+               (let ((paren-counter 0)
+                     (previous-counter 0))
+                 (mapcar
+                  #'string-join
+                  (-split-when
+                   (lambda (char)
+                     (setf previous-counter paren-counter)
+                     (cond
+                      ((string= char "(")
+                       (cl-incf paren-counter))
+                      ((string= char ")")
+                       (cl-decf paren-counter)))
+                     (= 0 paren-counter previous-counter))
+                   (butlast
+                    (cdr (split-string (format "%s " fns-string) ""))))))))
+    (message "Running %s" fn-strings)
+    (dolist (fn-string fn-strings)
+      (message "Running %s" fn-string)
+      (eval (read fn-string))
+      ;; (funcall (eval (read fn-string)))
+      )))
 
 (provide 'run-on-todo-state-change)
 ;;; run-on-todo-state-change.el ends here
