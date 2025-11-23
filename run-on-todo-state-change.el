@@ -68,12 +68,8 @@
                      (= 0 paren-counter previous-counter))
                    (butlast
                     (cdr (split-string (format "%s " fns-string) ""))))))))
-    (message "Running %s" fn-strings)
     (dolist (fn-string fn-strings)
-      (message "Running %s" fn-string)
-      (eval (read fn-string))
-      ;; (funcall (eval (read fn-string)))
-      )))
+      (eval (read fn-string)))))
 
 (provide 'run-on-todo-state-change)
 ;;; run-on-todo-state-change.el ends here
