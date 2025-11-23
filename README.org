@@ -1,44 +1,61 @@
 :PROPERTIES:
-:LAST_MODIFIED: [2025-11-23 Sun 10:03]
+:LAST_MODIFIED: [2025-11-23 Sun 10:43]
 :END:
 #+title: run-on-todo-state-change
 
-Run arbitrary code on org-mode TODO state change.
+Run arbitrary code on org-mode TODO state change; even *custom states*!
 
-* Install
+* Features
 
-** Doom Emacs
+** =run-on-state-change--*=
 
-In =packages.el=:
+Define a =run-on-state-change--<TODO state>= function and it'll be executed when a heading's TODO state is set to =<TODO state>=.
 
-#+begin_src emacs-lisp
-(package! run-on-todo-state-change
-  :recipe (:host github
-           :repo "cashpw/run-on-todo-state-change"))
+*** Examples
+
+**** Clock-in on INPROGRESS and out on DONE
+
+#+begin_src org-mode
+,#+begin_src emacs-lisp
+(defun run-on-state-change--INPROGRESS ()
+  "Run arbitrary code when todo state is changed to \"INPROGRESS\"."
+  (org-clock-in))
+
+(defun run-on-state-change--DONE ()
+  "Run arbitrary code when todo state is changed to \"DONE\"."
+  (org-clock-out-if-current))
+,#+end_src
 #+end_src
 
-In =config.el=:
+**** Add progress cookie on PROJ
 
-#+begin_src emacs-lisp
-(use-package! run-on-todo-state-change
-  :after org
-  (add-hook! 'org-after-todo-state-change-hook
-             'run-on-todo-state-change))
+#+begin_src org-mode
+,#+begin_src emacs-lisp
+(defun my/org-insert-progress-cookie ()
+  "Insert a progress cookie [/] at the end of the heading title and update it."
+  (interactive)
+  (when (org-back-to-heading t)
+    (end-of-line)
+    (when (re-search-backward ":[[:alnum:]_@#%:]+:[ \t]*$" (line-beginning-position) t)
+      (skip-chars-backward " \t"))
+    (insert " [/]")
+    (org-ctrl-c-ctrl-c)))
+
+(defun run-on-state-change--PROJ ()
+  "Run arbitrary code when todo state is changed to \"PROJ\"."
+  (my/org-insert-progress-cookie))
+,#+end_src
 #+end_src
 
-** Vanilla Emacs
+** =RUN_ON_*=
 
-TODO
-
-* Usage
-
-Set a =RUN_ON_<TODO state>= property on an org-mode headline to one or more functions and they'll run when the headline's state is set to =<TODO state>=. This *works with custom states*.
+Set a =RUN_ON_<TODO state>= property on an org-mode headline to one or more functions and they'll run when the headline's state is set to =<TODO state>=.
 
 For example: =RUN_ON_DONE= functions will be run when the headline is marked =DONE.
 
-** Examples
+*** Examples
 
-*** Trigger alerts on DONE
+**** Trigger alerts on DONE
 
 #+begin_src org-mode
 ,#+begin_src emacs-lisp
@@ -55,7 +72,7 @@ For example: =RUN_ON_DONE= functions will be run when the headline is marked =DO
 :END:
 #+end_src
 
-*** Increment ordinals in repeating events
+**** Increment ordinals in repeating events
 
 Requires [[https://github.com/cashpw/increment-ordinal][increment-ordinal]].
 
@@ -85,3 +102,31 @@ SCHEDULED: <2025-01-01 Mon ++1y>
 :RUN_ON_DONE: increment-ordinals-in-todo
 :END:
 #+end_src
+* Install
+
+** Doom Emacs
+
+In =packages.el=:
+
+#+begin_src emacs-lisp
+(package! run-on-todo-state-change
+  :recipe (:host github
+           :repo "cashpw/run-on-todo-state-change"))
+#+end_src
+
+In =config.el=:
+
+#+begin_src emacs-lisp
+(use-package! run-on-todo-state-change
+  :after org
+  :config
+  (add-hook! 'org-after-todo-state-change-hook
+             'run-on-todo-state-change)
+  ;; Optional, for custom behavior on setting DONE
+  (defun run-on-todo-state-change--DONE ()
+    (message "Done!")))
+#+end_src
+
+** Vanilla Emacs
+
+TODO
