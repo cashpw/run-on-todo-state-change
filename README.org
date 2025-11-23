@@ -1,12 +1,44 @@
+:PROPERTIES:
+:LAST_MODIFIED: [2025-11-23 Sun 10:03]
+:END:
 #+title: run-on-todo-state-change
 
 Run arbitrary code on org-mode TODO state change.
 
-Set a property of =RUN_ON_<TODO state>= to one or more functions and they'll
-run when the headline's state is set to =<TODO state>=.
+* Install
 
-* Examples
-** Trigger alerts on DONE
+** Doom Emacs
+
+In =packages.el=:
+
+#+begin_src emacs-lisp
+(package! run-on-todo-state-change
+  :recipe (:host github
+           :repo "cashpw/run-on-todo-state-change"))
+#+end_src
+
+In =config.el=:
+
+#+begin_src emacs-lisp
+(use-package! run-on-todo-state-change
+  :after org
+  (add-hook! 'org-after-todo-state-change-hook
+             'run-on-todo-state-change))
+#+end_src
+
+** Vanilla Emacs
+
+TODO
+
+* Usage
+
+Set a =RUN_ON_<TODO state>= property on an org-mode headline to one or more functions and they'll run when the headline's state is set to =<TODO state>=. This *works with custom states*.
+
+For example: =RUN_ON_DONE= functions will be run when the headline is marked =DONE.
+
+** Examples
+
+*** Trigger alerts on DONE
 
 #+begin_src org-mode
 ,#+begin_src emacs-lisp
@@ -23,9 +55,9 @@ run when the headline's state is set to =<TODO state>=.
 :END:
 #+end_src
 
-** Increment ordinals in repeating events
+*** Increment ordinals in repeating events
 
-Requires [[https://github.com/cashpw/increment-ordinal][cashpw/increment-ordinal]].
+Requires [[https://github.com/cashpw/increment-ordinal][increment-ordinal]].
 
 #+begin_src org-mode
 ,#+begin_src emacs-lisp
