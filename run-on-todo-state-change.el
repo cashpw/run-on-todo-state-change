@@ -69,33 +69,33 @@ For example: `run-on-todo-state-change--todo'"
 
 (defun run-on-todo-state-change--run-fns ()
   "Run arbitrary code on org-mode TODO state change."
-  (when-let* ((new-state org-state)
-              (fn (intern (concat run-on-todo-state-change--fn-prefix new-state))))
-    (funcall fn)))
+  (let* ((new-state org-state)
+         (fn (intern (concat run-on-todo-state-change--fn-prefix new-state))))
+    (when (functionp fn)
+      (funcall fn))))
 
 (defun run-on-todo-state-change--run-prop-fns ()
   "Run functions set through \"RUN_ON_\" properties."
-  (when-let*
-      ((new-state org-state)
-       (fns-string
-        (org-extras-get-property
-         (point) (run-on-todo-state-change-prop new-state)))
-       (fn-strings
-        (let ((paren-counter 0)
-              (previous-counter 0))
-          (mapcar
-           #'string-join
-           (-split-when
-            (lambda (char)
-              (setf previous-counter paren-counter)
-              (cond
-               ((string= char "(")
-                (cl-incf paren-counter))
-               ((string= char ")")
-                (cl-decf paren-counter)))
-              (= 0 paren-counter previous-counter))
-            (butlast
-             (cdr (split-string (format "%s " fns-string) ""))))))))
+  (when-let* ((new-state org-state)
+              (fns-string
+               (org-extras-get-property
+                (point) (run-on-todo-state-change-prop new-state)))
+              (fn-strings
+               (let ((paren-counter 0)
+                     (previous-counter 0))
+                 (mapcar
+                  #'string-join
+                  (-split-when
+                   (lambda (char)
+                     (setf previous-counter paren-counter)
+                     (cond
+                      ((string= char "(")
+                       (cl-incf paren-counter))
+                      ((string= char ")")
+                       (cl-decf paren-counter)))
+                     (= 0 paren-counter previous-counter))
+                   (butlast
+                    (cdr (split-string (format "%s " fns-string) ""))))))))
     (dolist (fn-string fn-strings)
       (eval (read fn-string)))))
 
